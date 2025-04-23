@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { Loader2, KeyRound, HandHeart, Users } from 'lucide-react';
-import PageContainer from '@/components/PageContainer';
-import AccessibilityControls from '@/components/AccessibilityControls';
 
-const Login: React.FC = () => {
+const LoginPage = () => {
   const { login, isLoading, error } = useApp();
   const [accessCode, setAccessCode] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (accessCode.trim()) {
       const success = await login(accessCode.trim());
@@ -35,99 +32,97 @@ const Login: React.FC = () => {
   };
 
   return (
-    <PageContainer>
-      <div className="container mx-auto px-4 py-8 max-w-md">
-        <Card className="border-blue-200 shadow-md bg-white overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-400 py-6 px-4 text-center">
-            <div className="bg-white rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-              <HandHeart size={32} className="text-orange-500" />
-            </div>
-            <h1 className="text-2xl font-bold text-white">Welcome to BridgeGap</h1>
-            <p className="text-blue-100">Connecting you with support services</p>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="bg-white shadow-md p-4">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <span className="text-2xl font-bold text-orange-500">BridgeGap</span>
+            <span className="text-2xl font-bold text-blue-700 ml-1">Connect</span>
           </div>
-          
-          <CardContent className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="text-center mb-4">
-                <h2 className="text-xl font-medium text-blue-800">Enter Your Access Code</h2>
-                <p className="text-gray-600 text-sm">Please enter the code given to you by staff</p>
-              </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex">
+        {/* Left side (form) */}
+        <div className="w-full md:w-1/2 p-8 flex flex-col justify-center items-center">
+          <div className="w-full max-w-md">
+            <h1 className="text-3xl font-bold mb-2">Reach out for support now!</h1>
+            <p className="text-lg text-gray-600 mb-8">Talk with our team <span className="text-orange-500 font-semibold">today</span>.</p>
             
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="accessCode" className="block text-sm font-medium mb-1">
+                  Access Code
+                </label>
                 <Input
                   id="accessCode"
                   type="text"
                   value={accessCode}
                   onChange={(e) => setAccessCode(e.target.value)}
-                  autoComplete="off"
-                  placeholder="Your access code here"
-                  autoFocus
+                  placeholder="Enter your access code"
+                  className="w-full p-3 border rounded-md"
                   required
-                  className="border-blue-200 focus:border-blue-400 text-xl py-6 text-center"
                 />
               </div>
               
               {error && (
-                <div className="bg-red-100 p-4 rounded-md text-red-700 text-center">
-                  <p>That code didn't work. Please try again or ask staff for help.</p>
+                <div className="bg-red-50 text-red-600 p-3 rounded-md flex items-start">
+                  <AlertCircle className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+                  <p>{error}</p>
                 </div>
               )}
 
               <Button 
                 type="submit" 
                 disabled={isLoading} 
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-white text-xl py-7"
+                className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-md font-medium"
               >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                    Connecting...
-                  </>
-                ) : (
-                  'Sign In'
-                )}
+                {isLoading ? "Logging in..." : "Login"}
               </Button>
             </form>
             
-            <div className="mt-6 text-center">
-              <p className="text-gray-600 mb-2">Need help?</p>
-              <p className="text-blue-800 font-medium">Ask any staff member for assistance</p>
-            </div>
-          </CardContent>
-          
-          <CardFooter className="bg-gray-50 p-4 flex flex-col space-y-4">
-            <div className="w-full">
-              <p className="text-sm text-center text-blue-800 mb-2">For Demonstration Purposes</p>
-              <div className="grid grid-cols-2 gap-2">
+            <div className="mt-8 border-t pt-6">
+              <p className="text-sm text-gray-500 mb-4 text-center">
+                Don't have an access code? Visit any Father Joe's Villages location or contact an outreach worker.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-3">
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  onClick={loginAsClient} 
-                  className="border-orange-500 text-orange-500 hover:bg-orange-50 flex items-center"
+                  onClick={loginAsClient}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50"
                 >
-                  <Users size={16} className="mr-1" />
                   Client Demo
                 </Button>
                 <Button 
                   variant="outline" 
-                  size="sm" 
-                  onClick={loginAsStaff} 
-                  className="border-orange-500 text-orange-500 hover:bg-orange-50 flex items-center"
+                  onClick={loginAsStaff}
+                  className="border-blue-300 text-blue-600 hover:bg-blue-50"
                 >
-                  <KeyRound size={16} className="mr-1" />
                   Staff Demo
                 </Button>
               </div>
             </div>
-            
-            <div className="w-full pt-2">
-              <AccessibilityControls />
+          </div>
+        </div>
+        
+        {/* Right side (image) */}
+        <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-blue-800 to-blue-500 p-8">
+          <div className="h-full flex flex-col justify-center items-center">
+            <div className="max-w-lg">
+              <img 
+                src="/api/placeholder/600/400" 
+                alt="Support Illustration" 
+                className="w-full h-auto"
+              />
             </div>
-          </CardFooter>
-        </Card>
-      </div>
-    </PageContainer>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 };
 
-export default Login;
+export default LoginPage;
