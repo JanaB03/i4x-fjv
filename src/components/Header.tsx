@@ -1,135 +1,62 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/context/AppContext';
-import { Menu, X, User, MessageCircle, Bell, MapPin, LogOut, Home } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Book, MessageCircle, MapPin, LogOut } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { currentUser, logout } = useApp();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const isMobile = useIsMobile();
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   return (
-    <header className="bg-white shadow-md dark:bg-gray-800">
-      <div className="container mx-auto px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-fjv-purple">BridgeGap</span>
-          </Link>
-
-          {currentUser ? (
-            <>
-              {/* Mobile Menu Button */}
-              {isMobile && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleMenu}
-                  aria-label="Toggle menu"
-                >
-                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </Button>
-              )}
-
-              {/* Desktop Navigation */}
-              {!isMobile && (
-                <nav className="flex items-center space-x-1">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/" className="flex items-center space-x-1">
-                      <Home size={18} />
-                      <span>Home</span>
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/messages" className="flex items-center space-x-1">
-                      <MessageCircle size={18} />
-                      <span>Messages</span>
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/announcements" className="flex items-center space-x-1">
-                      <Bell size={18} />
-                      <span>Updates</span>
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link to="/locations" className="flex items-center space-x-1">
-                      <MapPin size={18} />
-                      <span>Map</span>
-                    </Link>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-1" onClick={logout}>
-                    <LogOut size={18} />
-                    <span>Logout</span>
-                  </Button>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/profile" className="flex items-center space-x-1">
-                      <User size={18} />
-                      <span>{currentUser.nickname}</span>
-                    </Link>
-                  </Button>
-                </nav>
-              )}
-            </>
-          ) : (
-            <div className="space-x-2">
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link to="/register">Register</Link>
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Menu */}
-        {isMobile && isMenuOpen && currentUser && (
-          <nav className="mt-4 flex flex-col space-y-2">
-            <Button variant="ghost" asChild className="justify-start">
-              <Link to="/" className="flex items-center space-x-2" onClick={toggleMenu}>
-                <Home size={20} />
-                <span>Home</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild className="justify-start">
-              <Link to="/messages" className="flex items-center space-x-2" onClick={toggleMenu}>
-                <MessageCircle size={20} />
-                <span>Messages</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild className="justify-start">
-              <Link to="/announcements" className="flex items-center space-x-2" onClick={toggleMenu}>
-                <Bell size={20} />
-                <span>Updates</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild className="justify-start">
-              <Link to="/locations" className="flex items-center space-x-2" onClick={toggleMenu}>
-                <MapPin size={20} />
-                <span>Map</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild className="justify-start">
-              <Link to="/profile" className="flex items-center space-x-2" onClick={toggleMenu}>
-                <User size={20} />
-                <span>Profile</span>
-              </Link>
-            </Button>
-            <Button variant="ghost" className="justify-start text-destructive hover:text-destructive" onClick={() => { logout(); toggleMenu(); }}>
-              <LogOut size={20} className="mr-2" />
-              <span>Logout</span>
-            </Button>
-          </nav>
-        )}
+    <div className="flex items-center justify-between bg-indigo-800 p-4">
+      <div className="flex items-center">
+        <Link to="/" className="flex items-center space-x-2">
+          <span className="text-orange-500 font-bold text-2xl">BridgeGap</span>
+          <div className="ml-2 bg-orange-500 h-8 w-8 rounded-full flex items-center justify-center">
+            <div className="text-white font-bold">FJV</div>
+          </div>
+        </Link>
       </div>
-    </header>
+
+      {currentUser ? (
+        <div className="flex items-center space-x-6">
+          <Button variant="ghost" size="sm" asChild className="text-white">
+            <Link to="/resources" className="flex items-center space-x-1">
+              <Book className="h-5 w-5" />
+              <span className="hidden md:inline">Resources</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="text-white">
+            <Link to="/locations" className="flex items-center space-x-1">
+              <MapPin className="h-5 w-5" />
+              <span className="hidden md:inline">Map</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="text-white">
+            <Link to="/messages" className="flex items-center space-x-1">
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden md:inline">Chat</span>
+            </Link>
+          </Button>
+          <Button 
+            className="bg-yellow-500 text-white px-4 py-2 rounded-full"
+            onClick={logout}
+          >
+            <LogOut className="h-5 w-5 mr-1" />
+            <span>Logout</span>
+          </Button>
+        </div>
+      ) : (
+        <div className="space-x-2">
+          <Button variant="outline" size="sm" asChild className="text-white border-white hover:bg-indigo-700">
+            <Link to="/login">Login</Link>
+          </Button>
+          <Button size="sm" asChild className="bg-yellow-500 hover:bg-yellow-600">
+            <Link to="/register">Register</Link>
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

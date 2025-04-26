@@ -1,23 +1,17 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useApp } from '@/context/AppContext';
+import PageContainer from '@/components/PageContainer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import PageContainer from '@/components/PageContainer';
-import ConfidentialityAlert from '@/components/ConfidentialityAlert';
-import MessageItem from '@/components/MessageItem';
-import { useApp } from '@/context/AppContext';
-import { Send, Users, UserPlus, User } from 'lucide-react';
-import { Department } from '@/types';
+import { Send, Search, Image, Paperclip, Mic, MapPin } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 const Messages: React.FC = () => {
-  const { currentUser, users, sendMessage, departments, getConversation, getPublicMessages } = useApp();
-  const [newMessage, setNewMessage] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('general');
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(undefined);
+  const { currentUser } = useApp();
   const navigate = useNavigate();
+  const [newMessage, setNewMessage] = useState('');
 
   // Redirect if not logged in
   if (!currentUser) {
@@ -25,200 +19,130 @@ const Messages: React.FC = () => {
     return null;
   }
 
-  const isStaff = currentUser.role === 'staff' || currentUser.role === 'admin';
-  
-  // For direct messages
-  const conversations = users
-    .filter(user => user.id !== currentUser.id)
-    .filter(user => 
-      // Staff can see clients
-      (isStaff && user.role === 'client') || 
-      // Clients can see staff
-      (!isStaff && user.role === 'staff')
-    );
+  const mockChats = [
+    { id: '1', name: 'Street Health', lastMessage: 'You: That sounds great!...' },
+    { id: '2', name: 'Day Center', lastMessage: 'Paul: Today\'s lunch will be...' }
+  ];
 
-  // Get current conversation
-  const currentConversation = selectedUserId 
-    ? getConversation(currentUser.id, selectedUserId)
-    : getPublicMessages();
-
-  // Filter departments for display
-  const departmentsToDisplay = departments
-    .filter(dept => dept.id !== 'general')
-    .sort((a, b) => a.name.localeCompare(b.name));
-  
-  const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
-    
-    try {
-      if (selectedUserId) {
-        // Direct message
-        await sendMessage(newMessage, selectedUserId);
-      } else {
-        // Public message for department
-        await sendMessage(newMessage, undefined, selectedDepartment, true);
-      }
-      setNewMessage('');
-    } catch (error) {
-      console.error('Failed to send message:', error);
-    }
-  };
-
-  const selectDepartment = (departmentId: string) => {
-    setSelectedDepartment(departmentId);
-    setSelectedUserId(undefined);
-  };
-
-  const selectUser = (userId: string) => {
-    setSelectedUserId(userId);
-  };
-  
   return (
     <PageContainer>
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">Messages</h1>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <Tabs defaultValue="departments">
-            <TabsList className="w-full">
-              <TabsTrigger value="departments" className="flex-1">
-                <Users size={16} className="mr-1" /> Public
-              </TabsTrigger>
-              <TabsTrigger value="direct" className="flex-1">
-                <User size={16} className="mr-1" /> Direct
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="departments" className="mt-2">
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm">Departments</CardTitle>
-                </CardHeader>
-                <CardContent className="py-0 px-2">
-                  <div className="space-y-1 max-h-[50vh] overflow-y-auto pr-2">
-                    <Button
-                      variant={selectedDepartment === 'general' && !selectedUserId ? 'default' : 'ghost'}
-                      className="w-full justify-start text-left"
-                      onClick={() => selectDepartment('general')}
-                    >
-                      General
-                    </Button>
-                    
-                    {departmentsToDisplay.map((dept) => (
-                      <Button
-                        key={dept.id}
-                        variant={selectedDepartment === dept.id && !selectedUserId ? 'default' : 'ghost'}
-                        className="w-full justify-start text-left"
-                        onClick={() => selectDepartment(dept.id)}
-                      >
-                        {dept.name}
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="direct" className="mt-2">
-              <Card>
-                <CardHeader className="py-3">
-                  <CardTitle className="text-sm">{isStaff ? 'Clients' : 'Staff'}</CardTitle>
-                </CardHeader>
-                <CardContent className="py-0 px-2">
-                  {conversations.length > 0 ? (
-                    <div className="space-y-1 max-h-[50vh] overflow-y-auto pr-2">
-                      {conversations.map((user) => (
-                        <Button
-                          key={user.id}
-                          variant={selectedUserId === user.id ? 'default' : 'ghost'}
-                          className="w-full justify-start text-left"
-                          onClick={() => selectUser(user.id)}
-                        >
-                          <div className="flex items-center">
-                            <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center mr-2">
-                              <span className="text-xs">{user.nickname[0]}</span>
-                            </div>
-                            <span>{user.nickname}</span>
-                          </div>
-                        </Button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-4 text-center text-muted-foreground">
-                      <p>No contacts yet</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+      <div className="flex flex-col">
+        {/* CommuniCare-style header - Optional, can be commented out if it conflicts with PageContainer */}
+        {/* 
+        <div className="bg-blue-900 text-white p-2 flex justify-between items-center">
+          <div className="text-2xl font-bold text-orange-500">CommuniCare</div>
+          <div className="flex gap-4">
+            <span>Resources</span>
+            <span>Map</span>
+            <span>Chat</span>
+            <span>Logout</span>
+          </div>
         </div>
+        */}
         
-        {/* Main Chat Area */}
-        <div className="lg:col-span-3">
-          <Card className="h-[75vh] flex flex-col">
-            <CardHeader className="py-3 border-b">
-              <CardTitle className="flex items-center text-lg">
-                {selectedUserId ? (
-                  <>
-                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center mr-2">
-                      <span className="text-xs text-primary-foreground">
-                        {users.find(u => u.id === selectedUserId)?.nickname[0]}
-                      </span>
-                    </div>
-                    <span>{users.find(u => u.id === selectedUserId)?.nickname}</span>
-                  </>
-                ) : (
-                  <>
-                    <Users size={18} className="mr-2" />
-                    {departments.find(d => d.id === selectedDepartment)?.name || 'General'} Chat
-                  </>
-                )}
-              </CardTitle>
-            </CardHeader>
-            
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col-reverse">
-              {currentConversation.length > 0 ? (
-                currentConversation.map((message) => (
-                  <MessageItem 
-                    key={message.id} 
-                    message={message} 
-                    isCurrentUser={message.senderId === currentUser.id}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+          {/* Left sidebar */}
+          <div className="lg:col-span-1">
+            <Card className="bg-gray-100">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">Chats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative mb-3">
+                  <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                  <Input 
+                    className="w-full pl-8 py-1 text-sm" 
+                    placeholder="Search chats" 
                   />
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                  <Users size={48} strokeWidth={1} />
-                  <p className="mt-4">No messages yet</p>
-                  <p className="text-sm">Start the conversation!</p>
                 </div>
-              )}
-            </div>
-            
-            <ConfidentialityAlert className="mx-4 mb-2" />
-            
-            <div className="p-4 pt-2 border-t">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type your message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                />
-                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                  <Send size={18} />
-                </Button>
+                
+                {mockChats.map(chat => (
+                  <div 
+                    key={chat.id}
+                    className="flex items-center p-2 rounded-lg hover:bg-gray-200 cursor-pointer mb-1"
+                  >
+                    <Avatar className="h-8 w-8 mr-2">
+                      <AvatarFallback className="bg-gray-500 text-white">
+                        {chat.name[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="overflow-hidden">
+                      <div className="font-medium text-sm">{chat.name}</div>
+                      <div className="text-xs text-gray-600 truncate">{chat.lastMessage}</div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Right chat area */}
+          <div className="lg:col-span-3">
+            <Card className="h-[75vh] flex flex-col">
+              <CardHeader className="py-3 border-b flex justify-between items-center">
+                <div className="flex items-center">
+                  <Avatar className="h-8 w-8 mr-2">
+                    <AvatarFallback className="bg-gray-500 text-white">S</AvatarFallback>
+                  </Avatar>
+                  <CardTitle className="text-lg">Street Health</CardTitle>
+                </div>
+              </CardHeader>
+              
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="text-center text-xs text-gray-500 my-2">
+                  May 19, 2023
+                </div>
+                
+                {/* Sample message from them */}
+                <div className="flex mb-4">
+                  <Avatar className="h-8 w-8 mr-2 mt-1">
+                    <AvatarFallback className="bg-gray-400 text-white">J</AvatarFallback>
+                  </Avatar>
+                  <div className="bg-gray-100 rounded-lg rounded-tl-none p-3 max-w-[60%]">
+                    <p className="text-sm">Hi James! I wanted to check in and remind you that your next appointment is this Friday, 5/22. Still available to meet?</p>
+                  </div>
+                </div>
+                
+                {/* Sample message from user */}
+                <div className="flex justify-end mb-4">
+                  <div className="bg-blue-100 rounded-lg rounded-tr-none p-3 max-w-[60%]">
+                    <p className="text-sm">That sounds great! See you then!</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </Card>
+              
+              <div className="p-2 border-t flex">
+                <div className="flex gap-1 mr-2">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8">
+                    <Image size={18} />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8">
+                    <MapPin size={18} />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8">
+                    <Paperclip size={18} />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8">
+                    <Mic size={18} />
+                  </Button>
+                </div>
+                
+                <div className="flex-1 flex">
+                  <Input
+                    className="flex-1 rounded-l-full rounded-r-none border-r-0"
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                  />
+                  <Button 
+                    className="rounded-l-none rounded-r-full bg-blue-100 text-blue-800 hover:bg-blue-200"
+                  >
+                    <Send size={18} />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
     </PageContainer>
