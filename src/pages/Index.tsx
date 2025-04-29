@@ -13,22 +13,29 @@ import {
   Navigation,
   Locate,
   ArrowRight,
-  X,
   ChevronLeft,
   ChevronRight,
   Calendar,
   Plus,
   MapPinOff,
   UserPlus,
-  Bell
+  Settings,
+  BookOpen,
+  LogOut,
+  Zap
 } from 'lucide-react';
 
-const BridgeGapApp = () => {
+const CommuniCare = () => {
   const [activeScreen, setActiveScreen] = useState('home');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userView, setUserView] = useState('client'); // 'client' or 'staff'
   
-  // Render appropriate screen based on state
-  const renderScreen = () => {
+  // Render appropriate screen based on login state and active screen
+  const renderContent = () => {
+    if (!isLoggedIn) {
+      return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
+    }
+    
     switch(activeScreen) {
       case 'messages':
         return <MessagesScreen goBack={() => setActiveScreen('home')} userView={userView} />;
@@ -46,306 +53,465 @@ const BridgeGapApp = () => {
             userView={userView}
             toggleUserView={() => setUserView(userView === 'client' ? 'staff' : 'client')}
             navigateTo={setActiveScreen}
+            onLogout={() => setIsLoggedIn(false)}
           />
         );
     }
   };
   
   return (
-    <div className="min-h-screen bg-blue-50">
-      {renderScreen()}
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {isLoggedIn && (
+        <MainHeader 
+          onHomeClick={() => setActiveScreen('home')} 
+          userView={userView}
+          onLogout={() => setIsLoggedIn(false)}
+        />
+      )}
       
-      {/* Bottom Navigation - Always visible */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center py-2">
-        <button 
-          className="flex flex-col items-center p-2" 
-          onClick={() => setActiveScreen('home')}
-        >
-          <Home size={24} className={activeScreen === 'home' ? "text-purple-600" : "text-gray-500"} />
-          <span className="text-xs mt-1">Home</span>
-        </button>
-        
-        <button 
-          className="flex flex-col items-center p-2"
-          onClick={() => setActiveScreen('myCode')}
-        >
-          <QrCode size={24} className={activeScreen === 'myCode' ? "text-purple-600" : "text-gray-500"} />
-          <span className="text-xs mt-1">My Code</span>
-        </button>
-        
-        <button 
-          className="flex flex-col items-center p-2"
-          onClick={() => setActiveScreen('checkIn')}
-        >
-          <CheckCircle size={24} className={activeScreen === 'checkIn' ? "text-purple-600" : "text-gray-500"} />
-          <span className="text-xs mt-1">Check In</span>
-        </button>
-        
-        <button 
-          className="flex flex-col items-center p-2"
-          onClick={() => setActiveScreen('shareLocation')}
-        >
-          <MapPin size={24} className={activeScreen === 'shareLocation' ? "text-purple-600" : "text-gray-500"} />
-          <span className="text-xs mt-1">Location</span>
-        </button>
-        
-        <button 
-          className="flex flex-col items-center p-2"
-          onClick={() => setActiveScreen('messages')}
-        >
-          <MessageCircle size={24} className={activeScreen === 'messages' ? "text-purple-600" : "text-gray-500"} />
-          <span className="text-xs mt-1">Messages</span>
+      <div className="container mx-auto px-4 md:px-6">
+        {renderContent()}
+      </div>
+      
+      {isLoggedIn && (
+        <MobileNav 
+          activeScreen={activeScreen} 
+          setActiveScreen={setActiveScreen} 
+        />
+      )}
+    </div>
+  );
+};
+
+// Main Header Component
+const MainHeader = ({ onHomeClick, userView, onLogout }) => {
+  return (
+    <header className="bg-[#1D2D5C] text-white py-4 px-6 flex items-center justify-between">
+      <div className="flex items-center">
+        <button onClick={onHomeClick} className="flex items-center">
+          <span className="text-[#FF7F50] text-2xl font-bold">CommuniCare</span>
         </button>
       </div>
+      
+      <div className="hidden md:flex items-center space-x-6">
+        <button className="flex items-center text-white px-3 py-2">
+          <BookOpen size={20} className="mr-2" />
+          <span>Resources</span>
+        </button>
+        
+        <button className="flex items-center text-white px-3 py-2">
+          <MapPin size={20} className="mr-2" />
+          <span>Map</span>
+        </button>
+        
+        <button className="flex items-center text-white px-3 py-2">
+          <MessageCircle size={20} className="mr-2" />
+          <span>Chat</span>
+        </button>
+        
+        <button 
+          onClick={onLogout}
+          className="bg-[#FF7F50] text-white rounded-full px-4 py-2 flex items-center"
+        >
+          <span className="mr-2">Logout</span>
+          <div className="h-6 w-6 bg-[#E5563C] rounded-full flex items-center justify-center text-white">
+            T
+          </div>
+        </button>
+      </div>
+    </header>
+  );
+};
+
+// Bottom Mobile Navigation
+const MobileNav = ({ activeScreen, setActiveScreen }) => {
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center py-2">
+      <button 
+        className="flex flex-col items-center p-2" 
+        onClick={() => setActiveScreen('home')}
+      >
+        <Home size={24} className={activeScreen === 'home' ? "text-[#FF7F50]" : "text-gray-500"} />
+        <span className="text-xs mt-1">Home</span>
+      </button>
+      
+      <button 
+        className="flex flex-col items-center p-2"
+        onClick={() => setActiveScreen('myCode')}
+      >
+        <QrCode size={24} className={activeScreen === 'myCode' ? "text-[#FF7F50]" : "text-gray-500"} />
+        <span className="text-xs mt-1">My ID</span>
+      </button>
+      
+      <button 
+        className="flex flex-col items-center p-2"
+        onClick={() => setActiveScreen('checkIn')}
+      >
+        <CheckCircle size={24} className={activeScreen === 'checkIn' ? "text-[#FF7F50]" : "text-gray-500"} />
+        <span className="text-xs mt-1">Check In</span>
+      </button>
+      
+      <button 
+        className="flex flex-col items-center p-2"
+        onClick={() => setActiveScreen('shareLocation')}
+      >
+        <MapPin size={24} className={activeScreen === 'shareLocation' ? "text-[#FF7F50]" : "text-gray-500"} />
+        <span className="text-xs mt-1">Location</span>
+      </button>
+      
+      <button 
+        className="flex flex-col items-center p-2"
+        onClick={() => setActiveScreen('messages')}
+      >
+        <MessageCircle size={24} className={activeScreen === 'messages' ? "text-[#FF7F50]" : "text-gray-500"} />
+        <span className="text-xs mt-1">Chat</span>
+      </button>
+    </div>
+  );
+};
+
+// Login Screen
+const LoginScreen = ({ onLogin }) => {
+  const [accessCode, setAccessCode] = useState('');
+  
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (accessCode.trim().length > 0) {
+      onLogin();
+    }
+  };
+  
+  // For demo, create quick login buttons
+  const handleDemoLogin = () => {
+    onLogin();
+  };
+  
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Login Header */}
+      <header className="bg-[#1D2D5C] shadow-md py-4 px-6">
+        <div className="container mx-auto flex justify-between items-center">
+          <div className="flex items-center">
+            <span className="text-[#FF7F50] text-2xl font-bold">CommuniCare</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content - Two-column layout */}
+      <main className="flex-1 flex">
+        {/* Left column (form) */}
+        <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center">
+          <div className="w-full max-w-md">
+            <h1 className="text-3xl font-bold mb-2">Reach out for support now!</h1>
+            <p className="text-lg text-gray-600 mb-8">Talk with our team <span className="text-[#FF7F50] font-semibold">today</span>.</p>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="accessCode" className="block text-sm font-medium mb-2">
+                  Access Code
+                </label>
+                <input
+                  id="accessCode"
+                  type="text"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  placeholder="Enter your access code"
+                  className="w-full p-4 border rounded-md"
+                  required
+                />
+              </div>
+              
+              <button 
+                onClick={handleLogin}
+                className="w-full bg-[#FF7F50] hover:bg-[#E5563C] text-white py-4 rounded-md font-medium"
+              >
+                Login
+              </button>
+            </div>
+            
+            <div className="mt-8 border-t pt-6">
+              <p className="text-sm text-gray-500 mb-4 text-center">
+                Don't have an access code? Visit any service location or contact an outreach worker.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={handleDemoLogin}
+                  className="border border-blue-300 text-blue-600 hover:bg-blue-50 py-3 rounded-md"
+                >
+                  Client Demo
+                </button>
+                <button 
+                  onClick={handleDemoLogin}
+                  className="border border-blue-300 text-blue-600 hover:bg-blue-50 py-3 rounded-md"
+                >
+                  Staff Demo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Right column - solid color background - hidden on mobile */}
+        <div className="hidden md:block md:w-1/2 bg-[#1D2D5C]">
+          <div className="h-full flex flex-col justify-center items-center p-8">
+            <div className="text-[#FF7F50] text-3xl font-bold mb-4">CommuniCare</div>
+            <div className="text-white text-lg">Connect with services and support</div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 };
 
 // Home Screen
-const HomeScreen = ({ userView, toggleUserView, navigateTo }) => {
+const HomeScreen = ({ userView, toggleUserView, navigateTo, onLogout }) => {
   return (
-    <div className="pb-16">
-      {/* Header */}
-      <header className="bg-purple-600 text-white p-4 text-center">
-        <h1 className="text-2xl font-bold">BridgeGap Connect</h1>
-        <button 
-          className="mt-2 px-4 py-1 bg-purple-800 rounded-full text-sm"
-          onClick={toggleUserView}
-        >
-          Switch to {userView === 'client' ? 'Staff' : 'Client'} View
-        </button>
-      </header>
-
-      <div className="p-4 max-w-md mx-auto">
+    <div className="py-8 md:py-12 mb-16 md:mb-0">
+      <div className="max-w-4xl mx-auto">
         {userView === 'client' ? (
           <>
-            <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-              <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-2xl font-bold mb-6 flex items-center">
+                <Zap size={28} className="text-[#FF7F50] mr-3" />
+                Quick Actions
+              </h2>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <button 
-                  className="bg-blue-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="h-32 bg-gradient-to-b from-[#1D2D5C] to-[#152348] text-white rounded-xl shadow-lg flex flex-col items-center justify-center border border-[#2A407C]/30"
                   onClick={() => navigateTo('checkIn')}
                 >
-                  <CheckCircle size={32} className="mb-2" />
-                  <span>Check In Now</span>
+                  <div className="w-16 h-16 rounded-full bg-[#2A407C] flex items-center justify-center mb-3">
+                    <CheckCircle size={36} className="text-white" />
+                  </div>
+                  <span className="font-medium">Check In Now</span>
                 </button>
                 
                 <button 
-                  className="bg-green-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="h-32 bg-gradient-to-b from-[#FF7F50] to-[#E5563C] text-white rounded-xl shadow-lg flex flex-col items-center justify-center border border-[#FF9B76]/30"
                   onClick={() => navigateTo('messages')}
                 >
-                  <MessageCircle size={32} className="mb-2" />
-                  <span>Messages</span>
+                  <div className="w-16 h-16 rounded-full bg-[#FF9B76] flex items-center justify-center mb-3">
+                    <MessageCircle size={36} className="text-white" />
+                  </div>
+                  <span className="font-medium">Messages</span>
                 </button>
                 
                 <button 
-                  className="bg-purple-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="h-32 bg-gradient-to-b from-[#3671B9] to-[#2A5D99] text-white rounded-xl shadow-lg flex flex-col items-center justify-center border border-[#5894D9]/30"
                   onClick={() => navigateTo('shareLocation')}
                 >
-                  <MapPin size={32} className="mb-2" />
-                  <span>Share Location</span>
+                  <div className="w-16 h-16 rounded-full bg-[#5894D9] flex items-center justify-center mb-3">
+                    <MapPin size={36} className="text-white" />
+                  </div>
+                  <span className="font-medium">Share Location</span>
                 </button>
                 
                 <button 
-                  className="bg-amber-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="h-32 bg-gradient-to-b from-[#F0AD4E] to-[#DF9B3A] text-white rounded-xl shadow-lg flex flex-col items-center justify-center border border-[#F5C47F]/30"
                   onClick={() => navigateTo('mapTracker')}
                 >
-                  <Navigation size={32} className="mb-2" />
-                  <span>Find Services</span>
+                  <div className="w-16 h-16 rounded-full bg-[#F5C47F] flex items-center justify-center mb-3">
+                    <Navigation size={36} className="text-white" />
+                  </div>
+                  <span className="font-medium">Find Services</span>
                 </button>
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="text-xl font-bold">Today's Updates</h2>
-                <span className="text-sm text-gray-500">April 28</span>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start">
-                  <Bell size={20} className="text-blue-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">Mobile Clinic Today</div>
-                    <div className="text-sm">Downtown from 10am-2pm</div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold">Today's Updates</h2>
+                  <span className="text-sm text-gray-500">April 28</span>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start">
+                    <Bell size={24} className="text-blue-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-medium">Mobile Clinic Today</div>
+                      <div className="text-sm">Downtown from 10am-2pm</div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start">
+                    <Bell size={24} className="text-amber-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-medium">Weather Alert</div>
+                      <div className="text-sm">Rain tonight. Extra shelter beds available.</div>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start">
-                  <Bell size={20} className="text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
+                <button className="w-full mt-4 py-3 text-center text-[#FF7F50] font-medium">
+                  See All Updates
+                </button>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-bold mb-4">Your Appointments</h2>
+                
+                <div className="p-4 border rounded-lg mb-4 flex items-start">
+                  <Calendar size={28} className="text-[#FF7F50] mr-3 mt-0.5 flex-shrink-0" />
                   <div>
-                    <div className="font-medium">Weather Alert</div>
-                    <div className="text-sm">Rain tonight. Extra shelter beds available.</div>
+                    <div className="font-medium">Case Manager Meeting</div>
+                    <div className="text-sm">Tomorrow at 2:00 PM</div>
+                    <div className="text-sm text-gray-500">Main Center</div>
                   </div>
                 </div>
+                
+                <button className="flex items-center justify-center w-full py-3 text-[#FF7F50] font-medium">
+                  <Plus size={20} className="mr-2" />
+                  Add Appointment Reminder
+                </button>
               </div>
-              
-              <button className="w-full mt-3 py-2 text-center text-purple-600 font-medium">
-                See All Updates
-              </button>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-xl font-bold mb-3">Your Appointments</h2>
-              
-              <div className="p-3 border rounded-lg mb-3 flex items-start">
-                <Calendar size={24} className="text-purple-600 mr-2 mt-0.5 flex-shrink-0" />
-                <div>
-                  <div className="font-medium">Case Manager Meeting</div>
-                  <div className="text-sm">Tomorrow at 2:00 PM</div>
-                  <div className="text-sm text-gray-500">Main Village Campus</div>
-                </div>
-              </div>
-              
-              <button className="flex items-center justify-center w-full py-2 text-purple-600 font-medium">
-                <Plus size={16} className="mr-1" />
-                Add Appointment Reminder
-              </button>
             </div>
           </>
         ) : (
           <>
-            <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-              <h2 className="text-xl font-bold mb-4">Staff Dashboard</h2>
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+              <h2 className="text-2xl font-bold mb-6">Staff Dashboard</h2>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <button 
-                  className="bg-blue-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="bg-[#1D2D5C] text-white p-6 rounded-lg flex flex-col items-center"
                   onClick={() => navigateTo('messages')}
                 >
-                  <MessageCircle size={32} className="mb-2" />
+                  <MessageCircle size={40} className="mb-3" />
                   <span>Client Messages</span>
                 </button>
                 
                 <button 
-                  className="bg-green-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="bg-[#FF7F50] text-white p-6 rounded-lg flex flex-col items-center"
                   onClick={() => navigateTo('checkIn')}
                 >
-                  <CheckCircle size={32} className="mb-2" />
+                  <CheckCircle size={40} className="mb-3" />
                   <span>View Check-ins</span>
                 </button>
                 
                 <button 
-                  className="bg-purple-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="bg-[#3671B9] text-white p-6 rounded-lg flex flex-col items-center"
                   onClick={() => navigateTo('shareLocation')}
                 >
-                  <MapPin size={32} className="mb-2" />
+                  <MapPin size={40} className="mb-3" />
                   <span>Client Locations</span>
                 </button>
                 
                 <button 
-                  className="bg-amber-500 text-white p-4 rounded-lg flex flex-col items-center"
+                  className="bg-[#F0AD4E] text-white p-6 rounded-lg flex flex-col items-center"
                   onClick={() => navigateTo('mapTracker')}
                 >
-                  <Navigation size={32} className="mb-2" />
+                  <Navigation size={40} className="mb-3" />
                   <span>Mobile Services</span>
                 </button>
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-              <h2 className="text-xl font-bold mb-3">Recent Check-ins</h2>
-              
-              <div className="space-y-3">
-                <div className="p-3 border rounded-lg flex items-start">
-                  <div className="bg-blue-100 rounded-full p-2 mr-2 flex-shrink-0">
-                    <User size={20} className="text-blue-600" />
-                  </div>
-                  <div className="flex-grow">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Alex T.</span>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">30m ago</span>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-bold mb-4">Recent Check-ins</h2>
+                
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg flex items-start">
+                    <div className="bg-[#1D2D5C] rounded-full p-2 mr-3 flex-shrink-0">
+                      <User size={24} className="text-white" />
                     </div>
-                    <div className="text-sm flex items-center text-gray-500">
-                      <MapPin size={14} className="mr-1" />
-                      Main Village Campus
+                    <div className="flex-grow">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Alex T.</span>
+                        <span className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full">30m ago</span>
+                      </div>
+                      <div className="text-sm flex items-center text-gray-500 mt-1">
+                        <MapPin size={16} className="mr-1" />
+                        Main Center
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 border rounded-lg flex items-start">
+                    <div className="bg-[#FF7F50] rounded-full p-2 mr-3 flex-shrink-0">
+                      <User size={24} className="text-white" />
+                    </div>
+                    <div className="flex-grow">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Jamie R.</span>
+                        <span className="text-sm bg-amber-100 text-amber-700 px-3 py-1 rounded-full">2h ago</span>
+                      </div>
+                      <div className="text-sm flex items-center text-gray-500 mt-1">
+                        <MapPin size={16} className="mr-1" />
+                        Mobile Outreach - Downtown
+                      </div>
                     </div>
                   </div>
                 </div>
                 
-                <div className="p-3 border rounded-lg flex items-start">
-                  <div className="bg-purple-100 rounded-full p-2 mr-2 flex-shrink-0">
-                    <User size={20} className="text-purple-600" />
-                  </div>
-                  <div className="flex-grow">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Jamie R.</span>
-                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">2h ago</span>
-                    </div>
-                    <div className="text-sm flex items-center text-gray-500">
-                      <MapPin size={14} className="mr-1" />
-                      Mobile Outreach - Downtown
+                <button 
+                  className="w-full mt-4 py-3 text-center text-[#FF7F50] font-medium"
+                  onClick={() => navigateTo('checkIn')}
+                >
+                  View All Check-ins
+                </button>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-bold mb-4">Clients Needing Response</h2>
+                
+                <div className="space-y-4">
+                  <div className="p-4 border border-red-200 bg-red-50 rounded-lg flex items-start">
+                    <MessageCircle size={24} className="text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="font-medium">3 Unread Messages</div>
+                      <button 
+                        className="mt-2 text-sm text-red-600 font-medium"
+                        onClick={() => navigateTo('messages')}
+                      >
+                        View Messages
+                      </button>
                     </div>
                   </div>
                 </div>
+                
+                <button 
+                  className="flex items-center justify-center w-full mt-4 py-3 text-[#FF7F50] font-medium"
+                  onClick={() => navigateTo('myCode')}
+                >
+                  <QrCode size={20} className="mr-2" />
+                  Scan Client Code
+                </button>
               </div>
-              
-              <button 
-                className="w-full mt-3 py-2 text-center text-purple-600 font-medium"
-                onClick={() => navigateTo('checkIn')}
-              >
-                View All Check-ins
-              </button>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-xl font-bold mb-3">Clients Needing Response</h2>
-              
-              <div className="space-y-3">
-                <div className="p-3 border border-red-200 bg-red-50 rounded-lg flex items-start">
-                  <MessageCircle size={20} className="text-red-600 mr-2 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">3 Unread Messages</div>
-                    <button 
-                      className="mt-1 text-sm text-red-600 font-medium"
-                      onClick={() => navigateTo('messages')}
-                    >
-                      View Messages
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <button 
-                className="flex items-center justify-center w-full mt-3 py-2 text-purple-600 font-medium"
-                onClick={() => navigateTo('myCode')}
-              >
-                <QrCode size={16} className="mr-1" />
-                Scan Client Code
-              </button>
             </div>
           </>
         )}
+        
+        {/* For demo - toggle between client and staff views */}
+        <button 
+          onClick={toggleUserView}
+          className="mt-6 text-center w-full p-3 border border-[#1D2D5C] text-[#1D2D5C] rounded-lg font-medium"
+        >
+          Switch to {userView === 'client' ? 'Staff' : 'Client'} View
+        </button>
       </div>
     </div>
   );
 };
 
-// Messages Screen with privacy controls
+// Messages Screen matching the screenshot
 const MessagesScreen = ({ goBack, userView }) => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   
   // Mock data
   const contacts = [
-    { id: 1, name: 'Case Manager Sarah', role: 'staff', unread: 2 },
-    { id: 2, name: 'Housing Specialist Mike', role: 'staff', unread: 0 },
-    { id: 3, name: 'Alex T.', role: 'client', unread: 1 },
-    { id: 4, name: 'Jamie R.', role: 'client', unread: 0 }
+    { id: 1, name: 'Street Health', role: 'staff', subtitle: 'Hey! How can we assist you today?', unread: 0 },
+    { id: 2, name: 'Day Center', role: 'staff', subtitle: 'Food, shower, and laundry will be available tomorrow', unread: 0 }
   ];
   
-  // Filter contacts based on user view
-  const filteredContacts = userView === 'client' 
-    ? contacts.filter(c => c.role === 'staff')
-    : contacts.filter(c => c.role === 'client');
-  
-  // Mock messages
+  // Mock messages for Street Health
   const mockMessages = [
-    { id: 1, sender: 'them', text: 'Hi there, just checking in. How are you doing today?', time: '10:30 AM' },
-    { id: 2, sender: 'me', text: 'I\'m doing okay. Had breakfast at the center.', time: '10:45 AM' },
-    { id: 3, sender: 'them', text: 'Great! I wanted to remind you about your housing appointment tomorrow at 2pm.', time: '10:47 AM' },
-    { id: 4, sender: 'me', text: 'Thanks for the reminder. I\'ll be there.', time: '11:02 AM' }
+    { id: 1, sender: 'them', text: 'Hi James! I wanted to check in and remind you that your next appointment is this Friday, 5/22. Still available to meet?', time: 'May 19, 2023' },
+    { id: 2, sender: 'me', text: 'That sounds great! See you then!', time: '10:45 AM' }
   ];
   
   const [messages, setMessages] = useState(mockMessages);
@@ -370,426 +536,204 @@ const MessagesScreen = ({ goBack, userView }) => {
   };
   
   return (
-    <div className="pb-16">
-      <header className="bg-purple-600 text-white p-3 flex items-center">
-        <button onClick={goBack} className="mr-2">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">Messages</h1>
-      </header>
-      
-      <div className="p-4">
-        {!selectedContact ? (
-          <div className="space-y-3">
-            <div className="bg-white rounded-lg shadow-md p-2 mb-2">
-              <h2 className="text-lg font-bold px-2 py-1">
-                {userView === 'client' ? 'Your Support Team' : 'Your Clients'}
-              </h2>
-              
-              {filteredContacts.map(contact => (
-                <button
-                  key={contact.id}
-                  className="w-full text-left p-3 border-b last:border-0 flex items-center"
-                  onClick={() => setSelectedContact(contact)}
-                >
-                  <div className={`rounded-full p-2 mr-3 flex-shrink-0 
-                    ${contact.role === 'staff' ? 'bg-blue-100' : 'bg-purple-100'}`}
-                  >
-                    <User size={24} className={contact.role === 'staff' ? 'text-blue-600' : 'text-purple-600'} />
-                  </div>
-                  <div className="flex-grow">
-                    <div className="font-medium">{contact.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {contact.role === 'staff' ? 'Support Staff' : 'Client'}
-                    </div>
-                  </div>
-                  {contact.unread > 0 && (
-                    <div className="bg-red-500 text-white rounded-full h-6 w-6 flex items-center justify-center">
-                      {contact.unread}
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-            
-            {/* Add new contact button for staff */}
-            {userView === 'staff' && (
-              <button className="w-full py-3 bg-purple-100 text-purple-600 rounded-lg font-medium flex items-center justify-center">
-                <UserPlus size={20} className="mr-2" />
-                Add New Client
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col h-[calc(100vh-12rem)]">
-            {/* Contact header */}
-            <div className="bg-white rounded-t-lg shadow p-3 flex items-center">
-              <button onClick={() => setSelectedContact(null)} className="mr-2">
-                <ChevronLeft size={20} />
-              </button>
-              <div className={`rounded-full p-2 mr-2 flex-shrink-0 
-                ${selectedContact.role === 'staff' ? 'bg-blue-100' : 'bg-purple-100'}`}
-              >
-                <User size={18} className={selectedContact.role === 'staff' ? 'text-blue-600' : 'text-purple-600'} />
-              </div>
-              <div>
-                <div className="font-medium">{selectedContact.name}</div>
-                <div className="text-xs text-gray-500">
-                  {selectedContact.role === 'staff' ? 'Support Staff' : 'Client'}
+    <div className="py-8 md:mb-0 mb-16">
+      <div className="mx-auto max-w-4xl">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="flex h-[calc(70vh)]">
+            <div className="w-1/3 border-r">
+              <div className="p-4 border-b">
+                <h2 className="font-bold text-lg">Chats</h2>
+                <div className="relative mt-3">
+                  <input
+                    type="text"
+                    placeholder="Search chats"
+                    className="w-full py-2 px-3 bg-gray-100 rounded-md text-sm pl-8"
+                  />
+                  <SearchIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
                 </div>
               </div>
-            </div>
-            
-            {/* Messages container */}
-            <div className="flex-grow bg-gray-50 p-3 overflow-y-auto flex flex-col-reverse space-y-reverse space-y-2">
-              {messages.map(message => (
-                <div
-                  key={message.id}
-                  className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'} relative group`}
-                >
+              
+              <div className="overflow-y-auto h-[calc(70vh-5rem)]">
+                {contacts.map(contact => (
                   <div 
-                    className={`max-w-[80%] p-3 rounded-lg relative
-                      ${message.sender === 'me' 
-                        ? 'bg-purple-500 text-white rounded-br-none' 
-                        : 'bg-white border rounded-bl-none'}`}
+                    key={contact.id}
+                    className="border-b p-3 flex items-center cursor-pointer hover:bg-gray-50"
+                    onClick={() => setSelectedContact(contact)}
                   >
-                    {message.text}
-                    <div className={`text-xs mt-1 ${message.sender === 'me' ? 'text-purple-200' : 'text-gray-500'}`}>
-                      {message.time}
+                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                      <User size={18} className="text-gray-600" />
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{contact.name}</div>
+                      <div className="text-sm text-gray-500 truncate">{contact.subtitle}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex-1 flex flex-col">
+              <div className="p-4 border-b flex items-center">
+                <div className="w-10 h-10 bg-[#FF7F50] rounded-full flex items-center justify-center mr-3">
+                  <User size={18} className="text-white" />
+                </div>
+                <div className="font-bold text-lg">Street Health</div>
+                <div className="ml-auto flex">
+                  <Phone className="h-5 w-5 text-gray-500" />
+                </div>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-4">
+                {messages.map(message => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender === 'me' ? 'justify-end' : 'justify-start'} relative group`}
+                  >
+                    {message.sender === 'them' && (
+                      <div className="flex items-start">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-2 flex-shrink-0 self-end">
+                          <User size={18} className="text-gray-600" />
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">{message.time}</div>
+                          <div className="bg-white p-3 rounded-lg shadow-sm max-w-xs relative">
+                            {message.text}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
-                    {/* Delete button - only for my messages for privacy */}
                     {message.sender === 'me' && (
-                      <button 
-                        onClick={() => handleDeleteMessage(message.id)}
-                        className="absolute right-0 top-0 -mt-2 -mr-2 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="flex items-start">
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1 text-right">{message.time}</div>
+                          <div className="bg-[#FFE2C9] p-3 rounded-lg shadow-sm max-w-xs relative">
+                            {message.text}
+                            {/* Delete button */}
+                            <button 
+                              onClick={() => handleDeleteMessage(message.id)}
+                              className="absolute right-0 top-0 -mt-2 -mr-2 bg-red-500 rounded-full p-1 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="w-10 h-10 bg-[#FF7F50] rounded-full flex items-center justify-center ml-2 flex-shrink-0 self-end">
+                          <div className="text-white font-bold text-sm">T</div>
+                        </div>
+                      </div>
                     )}
                   </div>
+                ))}
+              </div>
+              
+              <div className="p-3 border-t flex items-center">
+                <button className="p-2 text-gray-500">
+                  <DarkMode size={20} />
+                </button>
+                <div className="flex-1 flex mx-2 bg-gray-100 rounded-md">
+                  <button className="p-2 text-gray-500">
+                    <Image size={20} />
+                  </button>
+                  <button className="p-2 text-gray-500">
+                    <MapPin size={20} />
+                  </button>
+                  <button className="p-2 text-gray-500">
+                    <Microphone size={20} />
+                  </button>
+                  <input
+                    type="text"
+                    className="flex-1 bg-transparent py-2 px-3 outline-none"
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  />
                 </div>
-              ))}
-            </div>
-            
-            {/* Input area */}
-            <div className="bg-white rounded-b-lg shadow p-2 flex items-center">
-              <input
-                type="text"
-                className="flex-grow bg-gray-100 rounded-full px-4 py-2 outline-none"
-                placeholder="Type a message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
-              <button 
-                onClick={handleSendMessage}
-                className="ml-2 bg-purple-600 text-white rounded-full p-2"
-                disabled={!newMessage.trim()}
-              >
-                <Send size={20} />
-              </button>
+                <button 
+                  onClick={handleSendMessage}
+                  className="p-2 text-[#FF7F50]"
+                  disabled={!newMessage.trim()}
+                >
+                  <Send size={20} />
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 };
 
-// Share Location Screen
+// Location Sharing Screen
 const ShareLocationScreen = ({ goBack, userView }) => {
-  const [locationMethod, setLocationMethod] = useState('current');
-  const [pinConfirmed, setPinConfirmed] = useState(false);
-  
   return (
-    <div className="pb-16">
-      <header className="bg-purple-600 text-white p-3 flex items-center">
-        <button onClick={goBack} className="mr-2">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">
-          {userView === 'client' ? 'Share Your Location' : 'Client Locations'}
-        </h1>
-      </header>
-      
-      <div className="p-4">
-        {userView === 'client' ? (
-          !pinConfirmed ? (
-            <>
-              <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-                <h2 className="text-lg font-bold mb-3">How would you like to share?</h2>
-                
-                <div className="space-y-3">
-                  <button 
-                    className={`w-full py-3 px-4 rounded-lg flex items-center justify-between border-2
-                      ${locationMethod === 'current' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
-                    onClick={() => setLocationMethod('current')}
-                  >
-                    <div className="flex items-center">
-                      <Locate size={24} className="text-purple-600 mr-3" />
-                      <span className="font-medium">My Current Location</span>
-                    </div>
-                    {locationMethod === 'current' && (
-                      <div className="h-4 w-4 rounded-full bg-purple-500"></div>
-                    )}
-                  </button>
-                  
-                  <button 
-                    className={`w-full py-3 px-4 rounded-lg flex items-center justify-between border-2
-                      ${locationMethod === 'pin' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
-                    onClick={() => setLocationMethod('pin')}
-                  >
-                    <div className="flex items-center">
-                      <MapPin size={24} className="text-purple-600 mr-3" />
-                      <span className="font-medium">Drop a Pin on Map</span>
-                    </div>
-                    {locationMethod === 'pin' && (
-                      <div className="h-4 w-4 rounded-full bg-purple-500"></div>
-                    )}
-                  </button>
-                  
-                  <button 
-                    className={`w-full py-3 px-4 rounded-lg flex items-center justify-between border-2
-                      ${locationMethod === 'future' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
-                    onClick={() => setLocationMethod('future')}
-                  >
-                    <div className="flex items-center">
-                      <Clock size={24} className="text-purple-600 mr-3" />
-                      <span className="font-medium">Where I'll Be Later</span>
-                    </div>
-                    {locationMethod === 'future' && (
-                      <div className="h-4 w-4 rounded-full bg-purple-500"></div>
-                    )}
-                  </button>
-                </div>
-              </div>
+    <div className="py-8 md:mb-0 mb-16">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-center mb-6">Share Your Location</h2>
+          
+          <div className="space-y-5">
+            <button className="w-full py-4 px-6 rounded-lg bg-[#1D2D5C] text-white font-medium flex items-center justify-center gap-3">
+              <Locate size={24} />
+              <span>Share My Current Location</span>
+            </button>
             
-              {/* Map placeholder */}
-              <div className="bg-gray-200 rounded-lg h-60 mb-4 flex items-center justify-center relative">
-                <div className="absolute inset-0 bg-gray-100 opacity-50"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {locationMethod === 'pin' ? (
-                    <MapPin size={40} className="text-purple-600" />
-                  ) : (
-                    <div className="text-center p-4">
-                      <Locate size={40} className="mx-auto mb-2 text-purple-600" />
-                      <p className="text-sm text-gray-700">Tap the button below to share your location</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <button 
-                className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold text-lg flex items-center justify-center"
-                onClick={() => setPinConfirmed(true)}
-              >
-                {locationMethod === 'current' ? (
-                  <>
-                    <Locate size={24} className="mr-2" />
-                    Share My Current Location
-                  </>
-                ) : locationMethod === 'pin' ? (
-                  <>
-                    <MapPin size={24} className="mr-2" />
-                    Confirm Pin Location
-                  </>
-                ) : (
-                  <>
-                    <Clock size={24} className="mr-2" />
-                    Set Future Location
-                  </>
-                )}
-              </button>
-            </>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-green-100 border border-green-300 rounded-lg p-4 text-center">
-                <CheckCircle size={48} className="mx-auto mb-2 text-green-600" />
-                <h2 className="text-xl font-bold text-green-800">Location Shared!</h2>
-                <p className="mt-1">Your case manager has been notified</p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-4">
-                <h3 className="font-bold mb-2">Who can see this?</h3>
-                <p className="text-sm text-gray-700 mb-3">Your location is only shared with your assigned case manager and support team.</p>
-                
-                <div className="p-3 border rounded-lg">
-                  <div className="flex items-center">
-                    <div className="bg-blue-100 p-2 rounded-full mr-2">
-                      <User size={20} className="text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Case Manager Sarah</div>
-                      <div className="text-xs text-gray-500">Main Support Contact</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <button 
-                className="w-full py-3 bg-red-500 text-white rounded-lg font-bold text-lg flex items-center justify-center"
-                onClick={() => setPinConfirmed(false)}
-              >
-                <MapPinOff size={24} className="mr-2" />
-                Stop Sharing Location
-              </button>
-            </div>
-          )
-        ) : (
-          // Staff view of client locations
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-bold mb-3">Active Client Locations</h2>
-              
-              <div className="space-y-3">
-                <div className="p-3 border rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="font-bold">Alex T.</div>
-                    <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center">
-                      <Clock size={12} className="mr-1" />
-                      30 min ago
-                    </div>
-                  </div>
-                  <div className="flex items-center text-gray-500 mb-1">
-                    <MapPin size={16} className="mr-1 text-green-600" />
-                    <span className="text-sm">Main Village Campus</span>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                      <MessageCircle size={14} className="mr-1" />
-                      Message
-                    </button>
-                    <button className="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                      <Navigation size={14} className="mr-1" />
-                      Directions
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="p-3 border rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="font-bold">Jamie R.</div>
-                    <div className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full flex items-center">
-                      <Clock size={12} className="mr-1" />
-                      2 hours ago
-                    </div>
-                  </div>
-                  <div className="flex items-center text-gray-500 mb-1">
-                    <MapPin size={16} className="mr-1 text-amber-600" />
-                    <span className="text-sm">Downtown Library (Future Location)</span>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                      <MessageCircle size={14} className="mr-1" />
-                      Message
-                    </button>
-                    <button className="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                      <Navigation size={14} className="mr-1" />
-                      Directions
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <button className="w-full py-4 px-6 rounded-lg bg-[#FF7F50] text-white font-medium flex items-center justify-center gap-3">
+              <MapPin size={24} />
+              <span>Drop a Pin on Map</span>
+            </button>
             
-            {/* Map view of all clients */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-bold mb-3">Map View</h2>
-              
-              <div className="bg-gray-200 rounded-lg h-60 mb-2 flex items-center justify-center relative">
-                <div className="absolute inset-0 bg-gray-100 opacity-50"></div>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <MapPin size={32} className="text-purple-600 mb-2" />
-                  <p className="text-sm text-gray-700">Map showing client locations</p>
-                </div>
-              </div>
-              
-              <div className="text-xs text-gray-500 text-center">
-                Privacy notice: Exact locations are only visible to assigned case managers
-              </div>
-            </div>
+            <button className="w-full py-4 px-6 rounded-lg bg-[#3671B9] text-white font-medium flex items-center justify-center gap-3">
+              <Clock size={24} />
+              <span>Share Where I'll Be Later</span>
+            </button>
           </div>
-        )}
+          
+          <div className="bg-gray-100 mt-6 rounded-lg p-4 text-center">
+            <p className="text-gray-600">
+              Your location is only shared with your assigned case manager and support team.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-// Mobile Clinic Tracker with Uber-like interface
+// Mobile Clinic Tracker
 const MobileClinicTracker = ({ goBack, userView }) => {
   return (
-    <div className="pb-16">
-      <header className="bg-purple-600 text-white p-3 flex items-center">
-        <button onClick={goBack} className="mr-2">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">Mobile Services Tracker</h1>
-      </header>
-      
-      <div className="p-4">
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <h2 className="text-lg font-bold mb-3">Active Mobile Services</h2>
+    <div className="py-8 md:mb-0 mb-16">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-4">Mobile Services Tracker</h2>
           
-          <div className="space-y-3">
-            <div className="p-3 border rounded-lg border-blue-200 bg-blue-50 relative">
-              <div className="flex justify-between items-start mb-2">
-                <div className="font-bold">Mobile Health Clinic</div>
-                <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center">
-                  <Clock size={12} className="mr-1" />
+          <div className="space-y-4">
+            <div className="p-5 border rounded-lg border-blue-200 bg-blue-50 relative">
+              <div className="flex justify-between items-start mb-3">
+                <div className="text-xl font-bold">Mobile Health Clinic</div>
+                <div className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full flex items-center">
+                  <Clock size={16} className="mr-2" />
                   Active Now
                 </div>
               </div>
-              <div className="flex items-center text-gray-700 mb-1">
-                <MapPin size={16} className="mr-1 text-blue-600" />
-                <span className="text-sm">Downtown (10am - 2pm)</span>
+              <div className="flex items-center text-gray-700 mb-2">
+                <MapPin size={20} className="mr-2 text-blue-600" />
+                <span>Downtown (10am - 2pm)</span>
               </div>
-              <div className="flex items-center text-gray-700 mb-3">
-                <ArrowRight size={16} className="mr-1 text-blue-600" />
-                <span className="text-sm">Next: East Village (3pm - 6pm)</span>
+              <div className="flex items-center text-gray-700 mb-4">
+                <ArrowRight size={20} className="mr-2 text-blue-600" />
+                <span>Next: East Village (3pm - 6pm)</span>
               </div>
-              <div className="flex gap-2">
-                <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                  <Navigation size={14} className="mr-1" />
+              <div className="flex gap-3">
+                <button className="bg-[#1D2D5C] text-white px-4 py-2 rounded-lg flex items-center">
+                  <Navigation size={18} className="mr-2" />
                   Directions
                 </button>
-                <button className="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                  <MessageCircle size={14} className="mr-1" />
-                  Services
-                </button>
-              </div>
-              
-              {/* Live tracking status */}
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 h-16 w-4 flex flex-col items-center">
-                <div className="h-4 w-4 rounded-full bg-blue-600"></div>
-                <div className="h-8 w-1 bg-blue-300"></div>
-                <div className="h-4 w-4 rounded-full bg-gray-300"></div>
-              </div>
-            </div>
-            
-            <div className="p-3 border rounded-lg relative">
-              <div className="flex justify-between items-start mb-2">
-                <div className="font-bold">Food Distribution Van</div>
-                <div className="bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded-full flex items-center">
-                  <Clock size={12} className="mr-1" />
-                  Later Today
-                </div>
-              </div>
-              <div className="flex items-center text-gray-700 mb-1">
-                <MapPin size={16} className="mr-1 text-amber-600" />
-                <span className="text-sm">Balboa Park (12pm - 3pm)</span>
-              </div>
-              <div className="flex items-center text-gray-700 mb-3">
-                <ArrowRight size={16} className="mr-1 text-amber-600" />
-                <span className="text-sm">Next: Downtown (4pm - 6pm)</span>
-              </div>
-              <div className="flex gap-2">
-                <button className="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                  <Navigation size={14} className="mr-1" />
-                  Directions
-                </button>
-                <button className="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                  <MessageCircle size={14} className="mr-1" />
+                <button className="bg-[#FF7F50] text-white px-4 py-2 rounded-lg flex items-center">
+                  <MessageCircle size={18} className="mr-2" />
                   Services
                 </button>
               </div>
@@ -798,133 +742,64 @@ const MobileClinicTracker = ({ goBack, userView }) => {
         </div>
         
         {/* Map tracking view */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-          <h2 className="text-lg font-bold mb-3">Live Tracking Map</h2>
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-4">Live Tracking Map</h2>
           
-          <div className="bg-gray-200 rounded-lg h-60 mb-2 flex items-center justify-center relative">
+          <div className="bg-gray-200 rounded-lg h-80 mb-4 flex items-center justify-center relative">
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <div className="absolute top-1/4 left-1/3">
-                <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-600">
-                  <div className="h-3 w-3 rounded-full bg-blue-600 animate-ping"></div>
+                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-600">
+                  <div className="h-4 w-4 rounded-full bg-blue-600 animate-ping"></div>
                 </div>
               </div>
               <div className="absolute bottom-1/3 right-1/3">
-                <MapPin size={24} className="text-blue-600" />
+                <MapPin size={32} className="text-[#FF7F50]" />
               </div>
               
               {/* Driving path visualization */}
-              <div className="absolute top-1/4 left-1/3 w-24 h-24 border-b-2 border-l-2 border-blue-400 rounded-bl-full opacity-50" />
+              <div className="absolute top-1/4 left-1/3 w-32 h-32 border-b-2 border-l-2 border-blue-400 rounded-bl-full opacity-50" />
             </div>
           </div>
           
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="flex items-center">
-              <Navigation size={20} className="text-blue-600 mr-2" />
+              <Navigation size={24} className="text-blue-600 mr-3" />
               <div>
-                <div className="font-medium">Mobile Health Clinic ETA</div>
-                <div className="text-sm">15 minutes to East Village location</div>
+                <div className="font-medium text-lg">Mobile Health Clinic ETA</div>
+                <div>15 minutes to East Village location</div>
               </div>
             </div>
           </div>
-        </div>
-        
-        {/* Weekly schedule */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-lg font-bold mb-3">Weekly Schedule</h2>
-          
-          <div className="space-y-1">
-            <div className="flex items-center p-2 bg-purple-50 border-l-4 border-purple-500">
-              <div className="w-16 text-sm font-bold">Mon</div>
-              <div>
-                <div className="font-medium">Downtown (10am-2pm)</div>
-                <div className="text-xs text-gray-500">East Village (3pm-6pm)</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center p-2">
-              <div className="w-16 text-sm font-bold">Tue</div>
-              <div>
-                <div className="font-medium">Balboa Park (9am-1pm)</div>
-                <div className="text-xs text-gray-500">North Park (2pm-5pm)</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center p-2">
-              <div className="w-16 text-sm font-bold">Wed</div>
-              <div>
-                <div className="font-medium">Mission Valley (10am-2pm)</div>
-                <div className="text-xs text-gray-500">Downtown (3pm-6pm)</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center p-2">
-              <div className="w-16 text-sm font-bold">Thu</div>
-              <div>
-                <div className="font-medium">East Village (9am-1pm)</div>
-                <div className="text-xs text-gray-500">City Heights (2pm-5pm)</div>
-              </div>
-            </div>
-            
-            <div className="flex items-center p-2">
-              <div className="w-16 text-sm font-bold">Fri</div>
-              <div>
-                <div className="font-medium">Downtown (10am-3pm)</div>
-              </div>
-            </div>
-          </div>
-          
-          <button className="w-full mt-3 py-2 text-center text-purple-600 font-medium flex items-center justify-center">
-            <bell size={16} className="mr-1" />
-            Get Notifications
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// QR Code display screen
+// QR Code screen
 const MyCodeScreen = ({ goBack }) => {
   return (
-    <div className="pb-16">
-      <header className="bg-purple-600 text-white p-3 flex items-center">
-        <button onClick={goBack} className="mr-2">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">My BridgeGap ID</h1>
-      </header>
-      
-      <div className="p-4 flex flex-col items-center">
-        <div className="bg-white rounded-lg shadow-md p-6 text-center w-full max-w-xs mb-4">
-          <h2 className="text-xl font-bold mb-4">Alex T.</h2>
+    <div className="py-8 md:mb-0 mb-16">
+      <div className="max-w-md mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <h2 className="text-2xl font-bold mb-6">Your CommuniCare ID</h2>
           
           {/* QR Code Placeholder */}
-          <div className="bg-gray-100 h-48 w-48 mx-auto mb-4 flex items-center justify-center border-2 border-gray-300">
-            <QrCode size={80} className="text-gray-700" />
+          <div className="bg-gray-100 h-64 w-64 mx-auto mb-6 flex items-center justify-center border-2 border-gray-300 p-4">
+            <QrCode size={180} className="text-[#1D2D5C]" />
           </div>
           
-          <div className="text-xl font-mono font-bold tracking-wider">
-            FJ-1245-A8T
+          <div className="text-2xl font-mono font-bold tracking-wider text-[#1D2D5C] mb-2">
+            TSR-1245-A8T
           </div>
-          <div className="text-sm text-gray-500 mt-1">
+          <div className="text-sm text-gray-500 mb-6">
             Your Personal ID Code
           </div>
-        </div>
-        
-        <div className="space-y-3 w-full max-w-xs">
-          <button className="w-full bg-purple-600 text-white py-3 rounded-lg font-bold flex items-center justify-center">
-            <Printer size={20} className="mr-2" />
+          
+          <button className="w-full bg-[#FF7F50] text-white py-3 rounded-lg font-bold flex items-center justify-center">
+            <Printer size={24} className="mr-2" />
             Print ID Card
           </button>
-          
-          <div className="p-3 border rounded-lg bg-blue-50 border-blue-200 text-sm">
-            <p className="font-medium">Show this code to:</p>
-            <ul className="list-disc ml-5 mt-1 space-y-1">
-              <li>Check in at service locations</li>
-              <li>Access your account at any device</li>
-              <li>Get help when you lose your phone</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
@@ -933,246 +808,90 @@ const MyCodeScreen = ({ goBack }) => {
 
 // Check-in Screen
 const CheckInScreen = ({ goBack, userView }) => {
-  const [checkInConfirmed, setCheckInConfirmed] = useState(false);
-  
-  const mockCheckIns = [
-    { id: 1, name: 'Alex T.', location: 'Main Village Campus', time: '30 min ago' },
-    { id: 2, name: 'Jamie R.', location: 'Mobile Outreach - Downtown', time: '2 hours ago' },
-    { id: 3, name: 'Casey B.', location: 'East Village Center', time: '3 hours ago' },
-    { id: 4, name: 'Jordan M.', location: 'Balboa Park', time: 'Yesterday, 4:30 PM' }
-  ];
-  
   return (
-    <div className="pb-16">
-      <header className="bg-purple-600 text-white p-3 flex items-center">
-        <button onClick={goBack} className="mr-2">
-          <ChevronLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold">
-          {userView === 'client' ? 'Check In' : 'Client Check-ins'}
-        </h1>
-      </header>
-      
-      <div className="p-4">
-        {userView === 'client' ? (
-          !checkInConfirmed ? (
-            <>
-              <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-                <h2 className="text-lg font-bold mb-3">Quick Check-in</h2>
-                <p className="text-sm text-gray-700 mb-4">
-                  Let your case manager know where you are by checking in. Your location is only shared with your support team.
-                </p>
-                
-                <div className="space-y-3">
-                  <button className="w-full py-3 px-4 rounded-lg bg-blue-100 text-blue-700 font-medium flex items-center justify-between border border-blue-300">
-                    <div className="flex items-center">
-                      <Locate size={24} className="mr-3" />
-                      <span>Check in at my current location</span>
-                    </div>
-                    <ChevronRight size={20} />
-                  </button>
-                  
-                  <button className="w-full py-3 px-4 rounded-lg bg-gray-100 text-gray-700 font-medium flex items-center justify-between border border-gray-300">
-                    <div className="flex items-center">
-                      <QrCode size={24} className="mr-3" />
-                      <span>Scan a location QR code</span>
-                    </div>
-                    <ChevronRight size={20} />
-                  </button>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-                <h2 className="text-lg font-bold mb-3">Common Locations</h2>
-                
-                <div className="space-y-2">
-                  <button 
-                    className="w-full py-3 px-4 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-between"
-                    onClick={() => setCheckInConfirmed(true)}
-                  >
-                    <div className="flex items-center">
-                      <MapPin size={20} className="text-purple-600 mr-2" />
-                      <div className="text-left">
-                        <div className="font-medium">Main Village Campus</div>
-                        <div className="text-xs text-gray-500">1501 Imperial Ave</div>
-                      </div>
-                    </div>
-                    <ChevronRight size={20} className="text-purple-600" />
-                  </button>
-                  
-                  <button className="w-full py-3 px-4 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <MapPin size={20} className="text-purple-600 mr-2" />
-                      <div className="text-left">
-                        <div className="font-medium">East Village Center</div>
-                        <div className="text-xs text-gray-500">1545 K Street</div>
-                      </div>
-                    </div>
-                    <ChevronRight size={20} className="text-purple-600" />
-                  </button>
-                  
-                  <button className="w-full py-3 px-4 rounded-lg bg-purple-50 border border-purple-200 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <MapPin size={20} className="text-purple-600 mr-2" />
-                      <div className="text-left">
-                        <div className="font-medium">Downtown Library</div>
-                        <div className="text-xs text-gray-500">330 Park Blvd</div>
-                      </div>
-                    </div>
-                    <ChevronRight size={20} className="text-purple-600" />
-                  </button>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-4">
-                <h2 className="text-lg font-bold mb-3">Your Recent Check-ins</h2>
-                
-                <div className="space-y-2">
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex justify-between">
-                      <div className="font-medium">Main Village Campus</div>
-                      <div className="text-xs text-gray-500">Yesterday</div>
-                    </div>
-                    <div className="text-sm text-gray-500">10:30 AM</div>
-                  </div>
-                  
-                  <div className="p-3 border rounded-lg">
-                    <div className="flex justify-between">
-                      <div className="font-medium">Downtown Library</div>
-                      <div className="text-xs text-gray-500">Apr 26</div>
-                    </div>
-                    <div className="text-sm text-gray-500">2:15 PM</div>
-                  </div>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="space-y-4">
-              <div className="bg-green-100 border border-green-300 rounded-lg p-4 text-center">
-                <CheckCircle size={48} className="mx-auto mb-2 text-green-600" />
-                <h2 className="text-xl font-bold text-green-800">Checked In Successfully!</h2>
-                <p className="mt-1">Your case manager has been notified</p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-md p-4">
-                <h3 className="font-bold mb-3">Check-in Details</h3>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between p-2 border-b">
-                    <div className="text-gray-600">Location</div>
-                    <div className="font-medium">Main Village Campus</div>
-                  </div>
-                  
-                  <div className="flex justify-between p-2 border-b">
-                    <div className="text-gray-600">Time</div>
-                    <div className="font-medium">Apr 28, 10:30 AM</div>
-                  </div>
-                  
-                  <div className="flex justify-between p-2">
-                    <div className="text-gray-600">Status</div>
-                    <div className="font-medium text-green-600">Confirmed</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-3">
-                <button className="flex-1 py-3 bg-purple-600 text-white rounded-lg font-medium">
-                  Share Location
-                </button>
-                <button 
-                  className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium"
-                  onClick={() => setCheckInConfirmed(false)}
-                >
-                  Done
-                </button>
-              </div>
-            </div>
-          )
-        ) : (
-          // Staff view of check-ins
+    <div className="py-8 md:mb-0 mb-16">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold mb-5">Quick Check-in</h2>
+          
           <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-bold mb-3">Today's Check-ins</h2>
-              
-              <div className="space-y-3">
-                {mockCheckIns.map(checkIn => (
-                  <div key={checkIn.id} className="p-3 border rounded-lg">
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="font-bold">{checkIn.name}</div>
-                      <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                        {checkIn.time}
-                      </div>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <MapPin size={16} className="mr-1" />
-                      <span className="text-sm">{checkIn.location}</span>
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                        <MessageCircle size={14} className="mr-1" />
-                        Message
-                      </button>
-                      <button className="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-sm flex items-center">
-                        <Navigation size={14} className="mr-1" />
-                        Directions
-                      </button>
-                    </div>
-                  </div>
-                ))}
+            <button className="w-full py-4 px-6 rounded-lg bg-[#1D2D5C] text-white font-medium flex items-center justify-between">
+              <div className="flex items-center">
+                <Locate size={28} className="mr-4" />
+                <span>Check in at my current location</span>
               </div>
-            </div>
+              <ChevronRight size={24} />
+            </button>
             
-            {/* Map view of all check-ins */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-bold mb-3">Check-in Map</h2>
-              
-              <div className="bg-gray-200 rounded-lg h-60 mb-2 flex items-center justify-center relative">
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <div className="absolute top-1/4 left-1/3">
-                    <MapPin size={24} className="text-purple-600" />
-                  </div>
-                  <div className="absolute bottom-1/3 right-1/3">
-                    <MapPin size={24} className="text-blue-600" />
-                  </div>
-                  <div className="absolute top-1/2 right-1/4">
-                    <MapPin size={24} className="text-green-600" />
-                  </div>
-                </div>
+            <button className="w-full py-4 px-6 rounded-lg bg-[#FF7F50] text-white font-medium flex items-center justify-between">
+              <div className="flex items-center">
+                <QrCode size={28} className="mr-4" />
+                <span>Scan a location QR code</span>
               </div>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h2 className="text-lg font-bold mb-3">Check-in Statistics</h2>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between p-2 border-b">
-                  <div className="text-gray-600">Today</div>
-                  <div className="font-medium">12 check-ins</div>
-                </div>
-                
-                <div className="flex justify-between p-2 border-b">
-                  <div className="text-gray-600">This Week</div>
-                  <div className="font-medium">47 check-ins</div>
-                </div>
-                
-                <div className="flex justify-between p-2">
-                  <div className="text-gray-600">Most Popular</div>
-                  <div className="font-medium">Main Village Campus</div>
-                </div>
-              </div>
-              
-              <button className="w-full mt-3 py-2 text-center text-purple-600 font-medium">
-                View Detailed Reports
-              </button>
-            </div>
+              <ChevronRight size={24} />
+            </button>
           </div>
-        )}
+          
+          <div className="mt-6 bg-gray-100 rounded-lg p-4">
+            <p className="text-gray-700 text-center">
+              Let your case manager know where you are by checking in.
+              Your location is only shared with your support team.
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold mb-5">Common Locations</h2>
+          
+          <div className="space-y-4">
+            <button className="w-full py-4 px-6 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-between">
+              <div className="flex items-center">
+                <MapPin size={24} className="text-[#FF7F50] mr-3" />
+                <div className="text-left">
+                  <div className="font-medium">Main Center</div>
+                  <div className="text-sm text-gray-500">1501 Imperial Ave</div>
+                </div>
+              </div>
+              <ChevronRight size={24} className="text-[#FF7F50]" />
+            </button>
+            
+            <button className="w-full py-4 px-6 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-between">
+              <div className="flex items-center">
+                <MapPin size={24} className="text-[#FF7F50] mr-3" />
+                <div className="text-left">
+                  <div className="font-medium">Downtown Library</div>
+                  <div className="text-sm text-gray-500">330 Park Blvd</div>
+                </div>
+              </div>
+              <ChevronRight size={24} className="text-[#FF7F50]" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const bell = ({ size = 24, className = "" }) => (
+// Custom Icons
+const SearchIcon = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.3-4.3"/>
+  </svg>
+);
+
+const Bell = ({ size = 24, className = "" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg" 
     width={size} 
@@ -1190,4 +909,76 @@ const bell = ({ size = 24, className = "" }) => (
   </svg>
 );
 
-export default BridgeGapApp;
+const Phone = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+  </svg>
+);
+
+const DarkMode = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+  </svg>
+);
+
+const Image = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+    <circle cx="9" cy="9" r="2"/>
+    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+  </svg>
+);
+
+const Microphone = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+    <line x1="12" x2="12" y1="19" y2="22"/>
+  </svg>
+);
+
+export default CommuniCare;
